@@ -1,0 +1,36 @@
+name: Release
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install Dependencies
+        run: sudo apt-get install -y rpm
+
+      - name: Configure and Package
+        run: |
+          cmake -H. -B_build -DCPACK_GENERATOR="TGZ;DEB;RPM"
+          cmake --build _build --target package
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: _build/*.tar.gz
+          # Раскомментируй строку ниже, если хочешь deb/rpm в релизах:
+          # files: |
+          #   _build/*.tar.gz
+          #   _build/*.deb
+          #   _build/*.rpm
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
