@@ -34,6 +34,7 @@ if(BUILD_TESTS)
   add_test(NAME check COMMAND check)
 endif()
 
-install(TARGETS solver hello_world RUNTIME DESTINATION bin)
-install(TARGETS formatter formatter_ex solver_lib banking DESTINATION lib)
 include(CPackConfig.cmake)
+
+install(TARGETS solver hello_world RUNTIME DESTINATION bin)
+install(TARGETS formatter formatter_ex solver_lib DESTINATION lib)
