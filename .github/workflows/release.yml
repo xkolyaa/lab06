@@ -26,7 +26,10 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          files: _build/*.tar.gz
+          files: |
+            _build/*.tar.gz
+            _build/*.deb
+            _build/*.rpm
           # Раскомментируй строку ниже, если хочешь deb/rpm в релизах:
           # files: |
           #   _build/*.tar.gz
