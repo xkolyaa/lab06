@@ -1,39 +1,73 @@
 name: Release
+
 on:
   push:
     tags:
       - 'v*'
 
 jobs:
-  build:
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-    runs-on: ${{ matrix.os }}
+
+  linux:
+    runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v3
-        with:
-          submodules: recursive
 
-      - name: Install Dependencies
-        run: sudo apt-get install -y rpm
+      - name: Install RPM tools
+        run: sudo apt-get update && sudo apt-get install -y rpm
 
-      - name: Configure and Package
+      - name: Configure
+        run: cmake -H. -B_build
+
+      - name: Build packages
         run: |
-          cmake -H. -B_build -DCPACK_GENERATOR="TGZ;DEB;RPM"
-          cmake --build _build --target package
+          cd _build
+          cpack -G TGZ
+          cpack -G DEB
+          cpack -G RPM
 
-      - name: Release
+      - name: Release Linux Packages
         uses: softprops/action-gh-release@v1
         with:
           files: |
             _build/*.tar.gz
             _build/*.deb
             _build/*.rpm
-          # Раскомментируй строку ниже, если хочешь deb/rpm в релизах:
-          # files: |
-          #   _build/*.tar.gz
-          #   _build/*.deb
-          #   _build/*.rpm
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure
+        run: cmake -B_build
+
+      - name: Build MSI
+        run: |
+          cd _build
+          cpack -G WIX
+
+      - name: Release MSI
+        uses: softprops/action-gh-release@v1
+        with:
+          files: _build/*.msi
+
+  macos:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure
+        run: cmake -B_build
+
+      - name: Build DMG
+        run: |
+          cd _build
+          cpack -G DragNDrop
+
+      - name: Release DMG
+        uses: softprops/action-gh-release@v1
+        with:
+          files: _build/*.dmg
