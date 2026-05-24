@@ -43,10 +43,13 @@ jobs:
       - name: Configure
         run: cmake -B_build
 
+      - name: Build
+        run: cmake --build _build --config Release
+
       - name: Build MSI
         run: |
           cd _build
-          cpack -G WIX
+          cpack -C Release -G WIX
 
       - name: Release MSI
         uses: softprops/action-gh-release@v1
@@ -61,6 +64,9 @@ jobs:
 
       - name: Configure
         run: cmake -B_build
+
+      - name: Build
+        run: cmake --build _build
 
       - name: Build DMG
         run: |
